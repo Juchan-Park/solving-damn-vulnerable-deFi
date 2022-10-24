@@ -51,5 +51,22 @@ internal로 선언된 `_executeActionDuringFlashLoan()` 함수를 외부에서 �
 ethers 문법에서 시간이 조금 걸렸지만 해결 완료 :)
 
 
+## 3. Truster
+
+## 4. Side entrance
+
+### 첫 번째 시도
+`flashLoan`을 다시 실행 하는 re-entrancy 공격으로 접근했지만 `out of gas error`가 나면서 revert 됨
+
+<br>
+
+### 두 번째 시도
+try/catch 문을 사용해서 해결하려 했지만 실패.
+
+### 모범 답안
+먼저 `flashLoan`을 호출하고 execute 함수를 만들어서 다시 풀에 deposit한다. 이후 `flashLoan`이 끝나면 attack 함수 내에서 자금을 인출하고, receive 함수를 이용해 attacker에게 자금을 송금한다. 매우 깔끔한 방법.
+-> 한 번에 공격을 끝내는 방식으로 접근. 앞으로는 컨트랙트 내의 다른 함수를 활용하는 공격 방법도 고민해보자. `IFlashLoanEtherReceiver(msg.sender).execute{value: amount}();` 이 부분에서 msg.sender가 IFlashLoanEtherReceiver 타입으로 변하면서 execute를 실행할 수 있다는 것에 초점을 맞췄어야 했다. 단순히 함수를 하나 더 실행해서 이더를 옮기는 것으로 해석해서 잘못된 방향으로 접근했다. 의미 없는 라인은 없으니 한 줄을 읽을 때 제대로 해석하자.
+
+
 
 
